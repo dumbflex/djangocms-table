@@ -9,17 +9,14 @@ from djangocms_table.utils import static_url
 class TableWidget(Textarea):
     class Media:
         js = [static_url(path) for path in (
-                'js/jquery-1.8.3.min.js',
-                'js/jquery.handsontable.js',
-                'js/jquery.contextMenu.js',
+                'js/jquery-1.9.1.min.js',
+                'js/jquery.handsontable.full.js',
                 'js/jquery.ui.position.js',
                 'js/json2.js',
-                'js/bootstrap-typeahead.js',
             )]
         css = {
             'all': [static_url(path) for path in (
-                'css/jquery.handsontable.css',
-                'css/jquery.contextMenu.css',
+                'css/jquery.handsontable.full.css',
             )],
         }
 

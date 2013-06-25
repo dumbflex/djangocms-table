@@ -50,8 +50,8 @@
 	        rowHeaders: true,
 	    	colHeaders: true,
 		    contextMenu:true,
-		    onChange:function(changes, source){
-		    	$("#id_{{ name }}").val(JSON.stringify($(this).data('handsontable').getData()))
+		    afterChange:function(changes, source){
+		    	$("#id_{{ name }}").val(JSON.stringify(container.handsontable('getData')))
 		    },
 		    cells: function (row, col, prop) {
 		    	if(row < Number(top)){
