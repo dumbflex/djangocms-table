@@ -1,5 +1,6 @@
 
 from django import forms
+from django.forms.widgets import HiddenInput
 from django.forms.models import ModelForm
 from djangocms_table.widgets import TableWidget
 from djangocms_table.models import Table
@@ -11,6 +12,11 @@ from django.utils import simplejson
 class TableForm(ModelForm):
     table_data = forms.CharField(widget=TableWidget)
     csv_upload = forms.FileField(label=_("upload .csv file"), help_text=_("upload a .csv file to fill the table up."), required=False)
+    css_data = forms.CharField(widget=HiddenInput)
+
+    def __init__(self, *args, **kwargs):
+        super(TableForm, self).__init__(*args, **kwargs)
+        self.fields['table_data'].widget.form_instance = self
 
     def clean_csv_upload(self):
         if self.cleaned_data['csv_upload']:

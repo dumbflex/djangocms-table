@@ -13,6 +13,7 @@ class Table(CMSPlugin):
     headers_left = models.PositiveSmallIntegerField(_("left"), default=0)
     headers_bottom = models.PositiveSmallIntegerField(_("bottom"), default=0)
     table_data = models.TextField(_("table data"))
+    css_data = models.TextField(_("css data"))
 
 
 
@@ -21,3 +22,16 @@ class Table(CMSPlugin):
 
 
     search_fields = ('name', 'table_data')
+    
+    
+class CssClass(models.Model):
+    
+    table = models.ForeignKey(Table)
+    label = models.CharField(_("label"), max_length=256)
+    name = models.SlugField(_("css class"))
+    
+    
+    def __unicode__(self):
+        return self.label
+    
+    

@@ -1,79 +1,191 @@
 <div id="table"></div>
+<div id="table-cell-css">
+  <label>Set css class for current cell</label>
+  <select id="table-cell-class">
+    <option value="" selected>None</option>
+    {% if css_classes %}
+    {% for class in css_classes %}
+    <option value="{{ class.name }}">{{ class.label }}</option>
+    {% endfor %}
+    {% endif %}
+  </select>
+</div>
+<div id="css-table"></div>
 <script type="text/javascript">
 //<![CDATA]
-
-	(function($) {
-	
-	$(document).ready(function () {
-		{% if data %}var data = {{ data|safe }};{% endif %}
-	   	var headerRenderer = function (instance, td, row, col, prop, value, cellProperties) {
-	  		Handsontable.TextCell.renderer.apply(this, arguments);
-	  		$(td).css({
-	    		'background':'#ccc',
-	    		'font-weight':'bold'
-	  		});
-		};
-		
-		var normalRenderer = function (instance, td, row, col, prop, value, cellProperties) {
-	  		Handsontable.TextCell.renderer.apply(this, arguments);
-	  		$(td).css({
-	    		'background':'white',
-	    		'font-weight':'normal'
-	  		});
-		};
-
-		var container = $("#table")
-		var top = $("#id_headers_top").val();
-		var left = $("#id_headers_left").val();
-		var bottom = $("#id_headers_bottom").val();
-		
-		$("#id_headers_top").change(function(){
-			top = $(this).val();
-			rowCount = container.data('handsontable').rowCount
-			container.data('handsontable').render()
-		})
-		$("#id_headers_bottom").change(function(){
-			bottom = $(this).val();
-			rowCount = container.data('handsontable').rowCount
-			container.data('handsontable').render()
-		})
-		$("#id_headers_left").change(function(){
-			left = $(this).val();
-			rowCount = container.data('handsontable').rowCount
-			container.data('handsontable').render()
-		})
-
-	  	container.handsontable({
-		    {% if data %}data: data,{% endif %}
-		    startRows: 5,
-	    	startCols: 5,
-	        rowHeaders: true,
-	    	colHeaders: true,
-		    contextMenu:true,
-		    afterChange:function(changes, source){
-		    	$("#id_{{ name }}").val(JSON.stringify(container.handsontable('getData')))
-		    },
-		    cells: function (row, col, prop) {
-		    	if(row < Number(top)){
-		    		return {type: {renderer: headerRenderer}};
-		    	}
-    			if (col < Number(left)) {
-      				return {type: {renderer: headerRenderer}};
-    			}
-    			if(row + Number(bottom) >= rowCount){
-    				return {type: {renderer: headerRenderer}};
-    			}
-    			return {type: {renderer: normalRenderer}};
-  			}
-		});  
-		
-		var rowCount = container.data('handsontable').rowCount
-	});	 
+(function($) {
+  
+  $(document).ready(function () {
+    {% if data %}var data = {{ data|safe }};{% endif %}
+    {% if data %}var css_data = JSON.parse($("#id_css_data").val());{% endif %}
+    var cssContainer = $('#css-table')
+    cssContainer.handsontable({
+      {% if data %}data: css_data,{% endif %}
+      startRows: 5,
+      startCols: 5,
+      rowHeaders: true,
+      colHeaders: true,
+      afterChange: function(changes, source){
+        $("#id_css_data").val(JSON.stringify(cssContainer.handsontable('getData')))
+      }
+    });
+    
+    var headerRenderer = function (instance, td, row, col, prop, value, cellProperties) {
+      Handsontable.TextCell.renderer.apply(this, arguments);
+      $(td).css({
+        'background':'#ccc',
+        'font-weight':'bold',
+      });
+    };
+    
+    var normalRenderer = function (instance, td, row, col, prop, value, cellProperties) {
+      Handsontable.TextCell.renderer.apply(this, arguments);
+      $(td).css({
+        'background':'white',
+        'font-weight':'normal',
+        });
+    };
+    
+    var container = $("#table")
+    var top = $("#id_headers_top").val();
+    var left = $("#id_headers_left").val();
+    var bottom = $("#id_headers_bottom").val();
+    
+    $("#id_headers_top").change(function(){
+      top = $(this).val();
+      rowCount = container.data('handsontable').rowCount
+      container.data('handsontable').render()
+    })
+    $("#id_headers_bottom").change(function(){
+      bottom = $(this).val();
+      rowCount = container.data('handsontable').rowCount
+      container.data('handsontable').render()
+    })
+    $("#id_headers_left").change(function(){
+      left = $(this).val();
+      rowCount = container.data('handsontable').rowCount
+      container.data('handsontable').render()
+    })
+    
+    container.handsontable({
+      {% if data %}data: data,{% endif %}
+      startRows: 5,
+      startCols: 5,
+      rowHeaders: true,
+      colHeaders: true,
+      contextMenu: ['row_above','row_below','hsep1','col_left','col_right','hsep2','remove_row','remove_col'],
+      outsideClickDeselects : false,
+      afterChange: function(changes, source){
+        $("#id_{{ name }}").val(JSON.stringify(container.handsontable('getData')))
+      },
+      cells: function (row, col, prop) {
+        if(row < Number(top)){
+          return {type: {renderer: headerRenderer}};
+        }
+        if (col < Number(left)) {
+            return {type: {renderer: headerRenderer}};
+        }
+        if(row + Number(bottom) >= rowCount){
+          return {type: {renderer: headerRenderer}};
+        }
+        return {type: {renderer: normalRenderer}};
+      },
+      afterSelectionEnd: function (r, c, r2, c2) {
+        var ht = $('#css-table').handsontable('getInstance');
+        $("#table-cell-class").val(ht.getDataAtCell(r,c));
+      },
+      afterCreateRow: function (index) {
+        var ht = $('#css-table').handsontable('getInstance');
+        ht.alter('insert_row',index);
+      },
+      afterCreateCol: function (index) {
+        var ht = $('#css-table').handsontable('getInstance');
+        ht.alter('insert_col',index);
+      },
+      afterRemoveRow: function (index, amount) {
+        var ht = $('#css-table').handsontable('getInstance');
+        ht.alter('remove_row',index);
+      },
+      afterRemoveCol: function (index, amount) {
+        var ht = $('#css-table').handsontable('getInstance');
+        ht.alter('remove_col',index);
+      }
+    });
+    
+    var rowCount = container.data('handsontable').rowCount;
+    var colCount = container.data('handsontable').colCount;
+    
+    $("#table-cell-class").change(function () {
+      var selected = container.handsontable('getSelected');
+      var startRow = selected[0];
+      var startCol = selected[1];
+      var endRow = selected[2];
+      var endCol = selected[3];
+      var height = endRow-startRow;
+      var width = endCol-startCol;
+      var value = $("#table-cell-class").val();
+      var input = new Array();
+      for(var i=0;i<=height;i++) {
+        input[i] = new Array();
+        for(var j=0;j<=width;j++) {
+          input[i][j] = value;
+        }
+      }
+      var ht = $('#css-table').handsontable('getInstance');
+      ht.populateFromArray(startRow,startCol,input,endRow,endCol);
+    });
+      //console.log('inside')
+      // var selected = container.handsontable('getSelected');
+      // console.log(selected)
+      // var startRow = selected[0];
+      // var startCol = selected[1];
+      // var endRow = selected[2];
+      // var endCol = selected[3];
+// 
+      // var value = $("#table-cell-class").val();
+      // var input = new Array();
+      // for(var i=startRow;i<=endRow;i++) {
+        // input[i] = new Array();
+        // for(var j=startCol;j<=endCol;j++) {
+          // input[i][j] = value;
+        // }
+      // }
+// 
+      // var ht = $('#css-table').handsontable('getInstance');
+      // $("#table-cell-class").val(ht.populateFromArray(startRow,startCol,input,endRow,endCol));
+      
+      //var css_data = JSON.parse($("#id_css_data").val());
+      
+      //for(var i=startRow;i<=endRow;i++) {
+      //  for(var j=startCol;j<=endCol;j++) {
+      //    css_data[i][j] = $("#table-cell-class").val();
+      //  }
+      //}
+      
+      //css_data[selected[0]][selected[1]] = $("#table-cell-class").val();
+      
+      //$("#id_css_data").val(JSON.stringify(css_data));
+      
+      //console.log(selected[0])
+      //console.log($("#table-cell-class").val())
+    //});
+    
+    //var css_data = new Array();
+    //for (var i=0;i<rowCount;i++) {
+    //css_data[i] = new Array();
+    //for (var j=0;j<colCount;j++) {
+    //    css_data[i][j] = "time-table-none";
+     // }
+    //}
+    //$("#id_css_data").val(JSON.stringify(css_data));
+    //console.log(css_data)
+  });  
 })(jQuery); 
 
 
 //]]>
 </script>
 <style type="text/css">
-	#id_{{ name }} { display:none}
+  #id_{{ name }},#css-table,.field-css_data {display:none}
+  #table-cell-css {margin-top:15px;}
 </style>
