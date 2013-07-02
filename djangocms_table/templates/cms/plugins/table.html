@@ -3,9 +3,9 @@
 <table>{% for row in data %}
 	<tr>{% for cell,csscell in row %}
 		{% if forloop.parentloop.counter <= instance.headers_top or forloop.counter <= instance.headers_left or forloop.parentloop.revcounter <= instance.headers_bottom %}
-			<th>{% if cell %}{{ cell }}{% endif %}</th>
+			<th>{% if cell %}{{ cell|linebreaksbr }}{% endif %}</th>
 		{% else %}
-			<td{% if csscell %} class="{{ csscell }}"{% endif %}>{% if cell %}{{ cell }}{% endif %}</td>
+			<td{% if csscell %} class="{{ csscell }}"{% endif %}>{% if cell %}{{ cell|linebreaksbr }}{% endif %}</td>
 		{% endif %}
 		{% endfor %}
 	</tr>{% endfor %}
